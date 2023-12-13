@@ -79,11 +79,71 @@ Git跟踪并管理的是修改，而非文件。
 用git diff HEAD -- readme.txt命令可以查看工作区和版本库里面最新版本的区别
 
 ## 撤销修改
+git checkout -- file用版本库里的版本替换工作区的版本(git restore \<file>)
+总之，就是让这个文件回到最近一次git commit或git add时的状态.
+
+git reset HEAD \<file>可以把暂存区的修改撤销掉，重新放回工作区(git restore --staged \<file>)
 
 ## 删除文件
+在Git中，删除也是一个修改操作
+确实要从版本库中删除该文件，那就用命令git rm删掉，并且git commit
 
 # 远程仓库
+使用 GitHub
+由于本地Git仓库和GitHub仓库之间的传输是通过SSH加密的，所以，需要一点设置：
+1.创建SSH Key
+打开Shell（Windows下打开Git Bash），创建SSH Key：
+```shell
+$ ssh-keygen -t rsa -C "youremail@example.com"
+```
+一切顺利的话，可以在用户主目录里找到.ssh目录，里面有id_rsa和id_rsa.pub两个文件，这两个就是SSH Key的秘钥对，id_rsa是私钥，不能泄露出去，id_rsa.pub是公钥，可以放心地告诉任何人。
+
+2.登陆GitHub，打开“Account settings”，“SSH Keys”页面：
+然后，点“Add SSH Key”，填上任意Title，在Key文本框里粘贴id_rsa.pub文件的内容
+
+## 添加远程库
+现在的情景是，你已经在本地创建了一个Git仓库后，又想在GitHub创建一个Git仓库，并且让这两个仓库进行远程同步。
+
+首先登录GitHub创建一个新的仓库。
+
+然后在本地仓库目录运行命令：
+```
+git remote add origin git@github.com:CoderGzj/Git.git
+```
+添加后，远程库的名字就是origin，这是Git默认的叫法，也可以改成别的
+
+下一步，就可以把本地库的所有内容推送到远程库上
+git push -u origin master
+由于远程库是空的，第一次推送master分支时，加上了-u参数
+
+推送成功后，可以立刻在GitHub页面中看到远程库的内容已经和本地一模一样
+从现在起，只要本地作了提交，就可以通过命令：
+git push origin master
+
+* 删除远程库
+使用git remote rm \<name>。
+使用前，建议先用git remote -v查看远程库信息，然后，根据名字删除。
+此处的“删除”其实是解除了本地和远程的绑定关系，并不是物理上删除了远程库。远程库本身并没有任何改动。要真正删除远程库，需要登录到GitHub，在后台页面找到删除按钮再删除。
+
+## 从远程库克隆
+现在，假设我们从零开发，那么最好的方式是先创建远程库，然后，从远程库克隆。
+
+首先，登陆GitHub，创建一个新的仓库。
+
+现在，远程库已经准备好了，下一步是用命令git clone克隆一个本地库：
+```
+git clone git@github.com:CoderGzj/Git.git
+```
 
 # 分支管理
+Git的分支是与众不同的，无论创建、切换和删除分支，Git在1秒钟之内就能完成
+
+## 创建于合并分支
+
+## 解决冲突
+
+## 分支管理策略
+
+## Bug分支
 
 # 标签管理
