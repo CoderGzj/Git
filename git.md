@@ -139,11 +139,101 @@ git clone git@github.com:CoderGzj/Git.git
 Git的分支是与众不同的，无论创建、切换和删除分支，Git在1秒钟之内就能完成
 
 ## 创建于合并分支
+在版本回退里已经知道，每次提交，Git都把它们串成一条时间线，这条时间线就是一个分支。
+主分支，即master分支。HEAD严格来说不是指向提交，而是指向master，master才是指向提交的，所以，HEAD指向的就是当前分支。
+
+首先，我们创建dev分支，然后切换到dev分支
+```shell
+$ git checkout -b dev
+// git checkout命令加上-b参数表示创建并切换，相当于以下两条命令：
+$ git branch dev
+$ git checkout dev
+```
+
+用git branch命令查看当前分支。git branch命令会列出所有分支，当前分支前面会标一个*号。
+
+然后就可以在dev分支上正常提交，dev分支的工作完成就可以切换回master分支。
+
+现在把dev分支的工作成果合并到master分支上：
+\$ git merge dev
+git merge 命令用于合并指定分支到当前分支。
+
+合并完成后，就可以放心地删除dev分支了：
+\$ git branch -d dev
+
+* switch
+实际上，切换分支这个动作，用switch更科学。因此，最新版本的Git提供了新的git switch命令来切换分支：
+创建并切换到新的dev分支，可以使用：
+\$ git switch -c dev
+直接切换到已有的master分支，可以使用：
+\$ git switch master
+
+```
+小结
+Git鼓励大量使用分支：
+查看分支：git branch
+创建分支：git branch <name>
+切换分支：git checkout <name>或者git switch <name>
+创建+切换分支：git checkout -b <name>或者git switch -c <name>
+合并某分支到当前分支：git merge <name>
+删除分支：git branch -d <name>
+```
 
 ## 解决冲突
+当Git无法自动合并分支时，就必须首先解决冲突。解决冲突后，再提交，合并完成。
+解决冲突就是把Git合并失败的文件手动编辑为我们希望的内容，再提交。
+用git log --graph命令可以看到分支合并图。
 
 ## 分支管理策略
+通常，合并分支时，如果可能，Git会用Fast forward模式，但这种模式下，删除分支后，会丢掉分支信息。
+如果要强制禁用Fast forward模式，Git就会在merge时生成一个新的commit，这样，从分支历史上就可以看出分支信息。
+--no-ff参数，表示禁用Fast forward
+因为本次合并要创建一个新的commit，所以加上-m参数，把commit描述写进去。
+
+分支策略
+在实际开发中,应该按照几个基本原则进行分支管理：
+首先，master分支应该是非常稳定的，也就是仅用来发布新版本，平时不能在上面干活；
+干活都在dev分支上，也就是说，dev分支是不稳定的，到版本发布时把dev分支合并到master上，在master分支发布版本；
+每个人都在dev分支上干活，每个人都有自己的分支，时不时地往dev分支上合并就可以了。
 
 ## Bug分支
+每个bug都可以通过一个新的临时分支来修复，修复后，合并分支，然后将临时分支删除。
 
+Git还提供了一个stash功能，可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作。git stash
+刚才的工作现场存到哪去了？用git stash list命令查看。
+
+Git把stash内容存在某个地方了，但是需要恢复一下，有两个办法：
+1.git stash apply，但是恢复后stash内容并不删除，需要用git stash drop来删除；
+2.git stash pop，恢复的同时把stash内容也删了
+
+Git提供了cherry-pick命令，能复制一个特定的提交到当前分支。
+
+小结
+```
+修复bug通过创建新的bug分支进行修复，然后合并，最后删除；
+当手头工作没有完成时，先把工作现场git stash一下，然后去修复bug，修复后，再git stash pop，回到工作现场；
+在master分支上修复的bug，想要合并到当前dev分支，可以用git cherry-pick <commit>命令，把bug提交的修改“复制”到当前分支，避免重复劳动。
+```
+
+## Feature 分支
+开发一个新feature，最好新建一个分支；
+如果要丢弃一个没有被合并过的分支，可以通过git branch -D \<name>强行删除。
+
+## 多人协作
+当从远程仓库克隆时，实际上Git自动把本地的master分支和远程的master分支对应起来了，并且远程仓库的默认名称是origin。
+要查看远程库的信息，用git remote
+用git remote -v显示更详细的信息
+
+推送分支，就是把该分支上的所有本地提交推送到远程库。推送时，要指定本地分支，这样，Git就会把该分支推送到远程库对应的远程分支上：
+git push origin master
+git push origin dev
+
+但是，并不是一定要把本地分支往远程推送，那么，哪些分支需要推送，哪些不需要呢？
+* master分支是主分支，因此要时刻与远程同步；
+* dev分支是开发分支，团队所有成员都需要在上面工作，所以也需要与远程同步；
+* bug分支只用于在本地修复bug，就没必要推到远程了，除非老板要看看你每周到底修复了几个bug；
+* feature分支是否推到远程，取决于你是否和你的小伙伴合作在上面开发。
+
+
+## Rebase
 # 标签管理
