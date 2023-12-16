@@ -224,6 +224,7 @@ Git提供了cherry-pick命令，能复制一个特定的提交到当前分支。
 要查看远程库的信息，用git remote
 用git remote -v显示更详细的信息
 
+**推送分支**
 推送分支，就是把该分支上的所有本地提交推送到远程库。推送时，要指定本地分支，这样，Git就会把该分支推送到远程库对应的远程分支上：
 git push origin master
 git push origin dev
@@ -234,6 +235,77 @@ git push origin dev
 * bug分支只用于在本地修复bug，就没必要推到远程了，除非老板要看看你每周到底修复了几个bug；
 * feature分支是否推到远程，取决于你是否和你的小伙伴合作在上面开发。
 
+**抓取分支**
+多人协作时，大家都会往master和dev分支上推送各自的修改。
+当伙伴从远程库clone时，默认情况下，伙伴只能看到本地的master分支。
+
+伙伴要在dev分支上开发，就必须创建远程origin的dev分支到本地，于是用这个命令创建本地dev分支：
+git checkout -b dev origin/dev
+现在就可以在dev上继续修改，然后时不时地把dev分支push到远程。
+
+伙伴已经向origin/dev分支推送了他的提交，如果碰巧你也对同样的文件作了修改，并试图推送：推送失败，有冲突。
+解决办法：
+先用git pull把最新的提交从origin/dev抓下来，然后，在本地合并，解决冲突，再推送：
+git pull也失败了，原因是没有指定本地dev分支与远程origin/dev分支的链接，根据提示，设置dev和origin/dev的链接：
+git branch --set-upstream-to=origin/dev dev
+
+因此，多人协作的工作模式通常是这样：
+1. 首先，可以试图用git push origin \<branch-name>推送自己的修改；
+2. 如果推送失败，则因为远程分支比你的本地更新，需要先用git pull试图合并；
+3. 如果合并有冲突，则解决冲突，并在本地提交；
+4. 没有冲突或者解决掉冲突后，再用git push origin \<branch-name>推送就能成功！
+
+如果git pull提示no tracking information，则说明本地分支和远程分支的链接关系没有创建，用命令git branch --set-upstream-to \<branch-name> origin/\<branch-name>。
 
 ## Rebase
+命令git rebase
+rebase操作可以把本地未push的分叉提交历史整理成直线；
+rebase的目的是使得我们在查看历史提交的变化时更容易，因为分叉的提交需要三方对比。
+
 # 标签管理
+发布一个版本时，通常先在版本库中打一个标签（tag），这样就唯一确定了打标签时刻的版本。将来无论什么时候，取某个标签的版本，就是把那个打标签的时刻的历史版本取出来。所以，标签也是版本库的一个快照。
+
+Git的标签虽然是版本库的快照，但其实它就是指向某个commit的指针,标签不能移动，所以创建和删除标签都是瞬间完成的。
+
+## 创建标签
+首先，切换到需要打标签的分支上
+
+然后，命令git tag \<name>就可以打一个新标签：
+
+用命令git tag查看所有标签
+
+默认标签是打在最新提交的commit上的。如果忘了打标签，方法是找到历史提交的commit id，然后打上就可以了。git tag \<name> commit id
+
+注意，标签不是按时间顺序列出，而是按字母排序的。可以用git show \<tagname>查看标签信息
+
+还可以创建带有说明的标签，用-a指定标签名，-m指定说明文字
+
+## 操作标签
+命令git push origin \<tagname>可以推送一个本地标签；
+
+命令git push origin --tags可以推送全部未推送过的本地标签；
+
+命令git tag -d \<tagname>可以删除一个本地标签；
+
+命令git push origin :refs/tags/\<tagname>可以删除一个远程标签。
+
+# 使用GitHub
+在GitHub上，可以任意Fork开源仓库；
+自己拥有Fork后的仓库的读写权限；
+可以推送pull request给官方仓库来贡献代码。
+
+# 使用Gitee
+因为git本身是分布式版本控制系统，可以同步到另外一个远程库，当然也可以同步到另外两个远程库。
+
+使用多个远程库时，我们要注意，git给远程库起的默认名称是origin，如果有多个远程库，需要用不同的名称来标识不同的远程库。
+
+# 自定义Git
+Git还有很多可配置项。
+比如，让Git显示颜色，会让命令输出看起来更醒目：
+git config --global color.ui true
+
+## 忽略特殊文件
+忽略某些文件时，需要编写.gitignore
+.gitignore文件本身要放到版本库里，并且可以对.gitignore做版本管理
+
+## 配置别名
